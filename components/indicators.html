@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>grhs</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <style>
+        body {
+            background: #454545;
+        }
+
+        h1 {
+            margin: 50px auto;
+            color: #fff;
+        }
+
+        #indicators {
+            margin-top: 50px;
+        }
+
+        #indicators .col .card {
+            min-height: 238px;
+        }
+
+        button {
+            margin-top: 20px;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row justify-content-end">
+            <div class="col-4">
+                <div class="d-flex justify-content-end">
+                    <div id="name"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <h1>Введите данные</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Отделение</h5>
+                        <p class="card-text">
+                            <div class="form-group">
+                                <select id="branch" name="branch" class="form-control"></select>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Клапан</h5>
+                        <p class="card-text">
+                            <div class="form-group">
+                                <select id="valve" name="valve" class="form-control"></select>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row" id="indicators">
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Капельница</h5>
+                        <div class="card-text">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="dropper-volume" name="dropper-volume"
+                                    placeholder="Объем">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="dropper-ec" name="dropper-ec"
+                                    placeholder="EC">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="dropper-ph" name="dropper-ph"
+                                    placeholder="pH">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Дренаж</h5>
+                        <div class="card-text">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="drainage-volume" name="drainage-volume"
+                                    placeholder="Объем">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="drainage-ec" name="drainage-ec"
+                                    placeholder="EC">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="drainage-ph" name="drainage-ph"
+                                    placeholder="pH">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Мат</h5>
+                        <div class="card-text">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="mat-ec" name="mat-ec" placeholder="EC">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="mat-ph" name="mat-ph" placeholder="pH">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="row m-5">
+            <div class="col"></div>
+            <div class="col">
+                <button type="button" class="btn btn-warning btn-block btn-lg" id="clear-input">
+                    Очистить поля
+                </button>
+            </div>
+            <div class="col">
+                <button type="button" class="btn btn-success btn-block btn-lg" id="submit">
+                    Отправить
+                </button>
+            </div>
+        </div>
+        <div id="alert m-5"></div>
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+    </script>
+    <script>
+        $(document).ready(function () {
+
+            $('#name').html(localStorage.getItem('name') + ' ' + localStorage.getItem('lastname'));
+
+            $.post('https://denisdemchenko.ru/project/grhs/api/indicators/getBranch.php', function (response) {
+                var res = JSON.parse(response);
+                var str = '<option disabled selected>Выберите отделение</option>';
+                for (var item in res) {
+                    str += `<option value="${res[item].id}">${res[item].title}</option>`;
+                }
+                $('#branch').html(str);
+            });
+
+            $.post('https://denisdemchenko.ru/project/grhs/api/indicators/getValve.php', function (response) {
+                var res = JSON.parse(response);
+                var str = '<option disabled selected>Выберите клапан</option>';
+                for (var item in res) {
+                    str += `<option value="${res[item].id}">${res[item].title}</option>`;
+                }
+                $('#valve').html(str);
+            })
+
+            function clearInput() {
+                $('input#dropper-volume').val('');
+                $('input#dropper-ec').val('');
+                $('input#dropper-ph').val('');
+
+                $('input#drainage-volume').val('');
+                $('input#drainage-ec').val('');
+                $('input#drainage-ph').val('');
+                $('input#mat-ec').val('');
+                $('input#mat-ph').val('');
+
+                $('select[name=branch]').val('');
+                $('select#valve').val('');
+            }
+
+            $('#clear-input').on('click', clearInput);
+
+            $('#submit').on('click', function () {
+                var select = $('select');
+                var dropper = {};
+                var drainage = {};
+                var mat = {};
+                var data = {};
+                var spinner = $('#spinner');
+                spinner.css({
+                    'display': 'inline-block'
+                });
+
+                dropper['vol'] = $('input#dropper-volume').val();
+                dropper['ec'] = $('input#dropper-ec').val();
+                dropper['ph'] = $('input#dropper-ph').val();
+
+                drainage['vol'] = $('input#drainage-volume').val();
+                drainage['ec'] = $('input#drainage-ec').val();
+                drainage['ph'] = $('input#drainage-ph').val();
+
+                mat['ec'] = $('input#mat-ec').val();
+                mat['ph'] = $('input#mat-ph').val();
+
+                data['branch'] = $('select[name=branch]').val();
+                data['valve'] = $('select#valve').val();
+                data['dropper'] = dropper;
+                data['drainage'] = drainage;
+                data['mat'] = mat;
+                data['user'] = localStorage.getItem('id');
+
+                
+
+                $.post('https://denisdemchenko.ru/project/grhs/api/data/sendData.php', {
+                        data
+                    }, function (response) {
+                        console.log(response)
+                    })
+                    .done(function (response) {
+                        spinner.css({
+                            'display': 'none'
+                        });
+
+                        clearInput();
+
+                        $('#alert').html(
+                            `<div class="alert alert-success" role="alert"><p>Данные добавлены</p></div>`
+                            ).animate({
+                            opacity: "toggle"
+                        }, 5000, "linear")
+
+
+                    })
+                    .fail(function (err) {
+                        $('#alert').html(`<div class="alert alert-danger" role="alert">
+                                        <p>${err}</p>
+                                    </div>`);
+                    });
+            });
+
+
+        });
+    </script>
+</body>
+
+</html>

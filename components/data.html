@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>grhs</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <style>
+        #load {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ececec;
+        }
+
+        table tr td {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <section id="load">
+        <div class="spinner-border m-2" id="spinner" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </section>
+    <div class="container">
+        <div class="row">
+            <div class="col m-5">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Дата</h5>
+                        <div class="form-group row">
+                            <div class="col-sm-10">
+                                <input type="date"  class="form-control" id="data-date">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col m-5">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Отделение</h5>
+                        <p class="card-text">
+                            <div class="form-group">
+                                <select id="branch" name="branch" class="form-control"></select>
+                            </div>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <h4>Данные за <span id="yesterday"></span></h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="table-responsive-sm">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <td></td>
+                                <td colspan="3">Капельница</td>
+                                <td colspan="3">Дренаж</td>
+                                <td colspan="2">Мат</td>
+                                <td>Время</td>
+                            </tr>
+                            <tr>
+                                <td>№ клапана полива</td>
+                                <td>Объем</td>
+                                <td>EC</td>
+                                <td>pH</td>
+                                <td>Объем</td>
+                                <td>EC</td>
+                                <td>pH</td>
+                                <td>EC</td>
+                                <td>pH</td>
+                                <td></td>
+                            </tr>
+                        </thead>
+                        <tbody id="dynamic-data"></tbody>
+                    </table>
+                    <h5>Измерения выполнил: <span id="laborant"></span></h5>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+    </script>
+    <script>
+        $(document).ready(function () {
+            var spinner = $('#load');
+
+            $('#data-date').on('change', function (e) {
+                var dat = $(this).val();
+                var branch = $('select#branch').val();
+                if (dat != '' && branch != null) {
+                    onChange(dat, branch);
+                }
+            });
+
+            $('select#branch').on('change', function (e) {
+                var dat = $('#data-date').val();
+                var branch = $(this).val();
+                if (dat != '' && branch != null) {
+                    onChange(dat, branch);
+                }
+            });
+
+            function onChange(date, branch) {
+
+                var d = date.split('-');
+                var day = d[2];
+                var month = d[1];
+                var year = d[0];
+
+                $('#yesterday').html(day + '.' + month + '.' + year);
+                $.post('https://denisdemchenko.ru/project/grhs/api/data/getDataChange.php', {
+                        date,
+                        branch
+                    }, function (response) {
+                        var data = JSON.parse(response);
+                        var table = '';
+                        for (let i in data) {
+                            table += `<tr>
+                                    <td>${data[i].valve}</td>
+                                    <td>${data[i].dropper_vol}</td>
+                                    <td>${data[i].dropper_ec}</td>
+                                    <td>${data[i].dropper_ph}</td>
+                                    <td>${data[i].drainage_vol}</td>
+                                    <td>${data[i].drainage_ec}</td>
+                                    <td>${data[i].drainage_ph}</td>
+                                    <td>${data[i].mat_ec}</td>
+                                    <td>${data[i].mat_ph}</td>
+                                    <td>${data[i].time}</td>
+                                </tr>
+                        `;
+                        }
+
+                        $('#dynamic-data').html(table);
+
+                        $('#laborant').html(data[0].lastname + ' ' + data[0].name);
+
+                    })
+                    .done(function (response) {
+                        spinner.css({
+                            'display': 'none'
+                        });
+                    })
+                    .fail(function (err) {
+                        console.log(err);
+                    });
+
+                    
+
+            };
+
+            $.post('https://denisdemchenko.ru/project/grhs/api/indicators/getBranch.php', function (response) {
+                var res = JSON.parse(response);
+                var str = '<option disabled selected>Выберите отделение</option>';
+                for (var item in res) {
+                    str += `<option value="${res[item].id}">${res[item].title}</option>`;
+                }
+                $('#branch').html(str);
+            });
+
+            //запрашиваем данные вчерашнего дня при загрузке страницы
+
+            function mounted() {
+                var d = new Date();
+                d.setDate(d.getDate() - 1);
+                var yesterday = d.getFullYear() + '-' + d.getMonth() + 1 + '-' + d.getDate();
+                var yesterdayText = d.getDate() + '.' + d.getMonth() + 1 + '.' + d.getFullYear();
+                $('#yesterday').html(yesterdayText);
+
+                $.post('https://denisdemchenko.ru/project/grhs/api/data/getDataChange.php', {
+                        date: yesterday,
+                        branch: 1
+                    }, function (response) {
+                        var data = JSON.parse(response);
+                        var table = '';
+                        for (let i in data) {
+                            table += `<tr>
+                                    <td>${data[i].valve}</td>
+                                    <td>${data[i].dropper_vol}</td>
+                                    <td>${data[i].dropper_ec}</td>
+                                    <td>${data[i].dropper_ph}</td>
+                                    <td>${data[i].drainage_vol}</td>
+                                    <td>${data[i].drainage_ec}</td>
+                                    <td>${data[i].drainage_ph}</td>
+                                    <td>${data[i].mat_ec}</td>
+                                    <td>${data[i].mat_ph}</td>
+                                    <td>${data[i].time}</td>
+                                </tr>
+                        `;
+                        }
+
+                        $('#dynamic-data').html(table)
+
+                        $('#laborant').html(data[0].lastname + ' ' + data[0].name);
+
+
+                    })
+                    .done(function (response) {
+                        spinner.css({
+                            'display': 'none'
+                        });
+                    })
+                    .fail(function (err) {
+                        console.log(err);
+                    });
+            };
+
+            mounted();
+        });
+    </script>
+</body>
+
+</html>
